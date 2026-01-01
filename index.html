@@ -7,7 +7,6 @@
     <meta name="description" content="非官方 FFmpeg 预构建二进制文件下载，支持 Windows 和 Linux 多架构，自动同步最新版本">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="shortcut icon" href="https://ffmpeg.org/favicon.ico" />
 </head>
 <body>
     <div class="container">
@@ -33,16 +32,6 @@
                 <strong>加速说明：</strong> 本页面已集成 gh-proxy.com 加速服务，如果您在中国大陆访问 GitHub 下载较慢，可以使用加速下载链接。
             </div>
             
-            <div class="update-section">
-                <h3><i class="fas fa-history"></i> 更新状态</h3>
-                <div id="updateInfo" class="update-info">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>正在检查更新...</p>
-                    </div>
-                </div>
-            </div>
-            
             <div id="versionInfo" class="version-info">
                 <!-- 版本信息将通过JavaScript动态加载 -->
                 <div class="loading">
@@ -51,8 +40,18 @@
                 </div>
             </div>
             
+            <div id="updateInfo" class="update-info">
+                <!-- 更新信息将通过JavaScript动态加载 -->
+            </div>
+            
             <div class="download-section">
-                <h2 class="section-title"><i class="fas fa-cloud-download-alt"></i> 下载文件</h2>
+                <div class="download-header">
+                    <h2 class="section-title"><i class="fas fa-cloud-download-alt"></i> 下载文件</h2>
+                    <div id="controlPanel" class="control-panel">
+                        <!-- 控制面板将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
                 <div id="filesContainer" class="files-grid">
                     <!-- 文件列表将通过JavaScript动态加载 -->
                 </div>
@@ -118,12 +117,12 @@ ffmpeg -i input.mp4 output.avi</code></pre>
                     </div>
                     <div class="arch-item">
                         <i class="fas fa-desktop"></i>
-                        <h4>Linux amd64</h4>
+                        <h4>Linux x64</h4>
                         <p>标准 64 位 PC 服务器</p>
                     </div>
                     <div class="arch-item">
                         <i class="fas fa-desktop"></i>
-                        <h4>Linux i686</h4>
+                        <h4>Linux x86</h4>
                         <p>32 位 PC</p>
                     </div>
                     <div class="arch-item">
