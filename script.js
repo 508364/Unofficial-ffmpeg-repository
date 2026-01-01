@@ -11,50 +11,58 @@ const CONFIG = {
         'windows': {
             name: 'Windows',
             icon: 'fab fa-windows',
-            description: 'Windows 版本',
-            patterns: [/windows/i, /win/i, /\.exe/i, /essentials_build/i]
+            description: 'Windows 64位版本，包含 ffmpeg, ffprobe, ffplay',
+            patterns: [/windows/i, /win/i, /\.exe/i, /essentials_build/i],
+            order: 1
         },
         'linux-x64': {
             name: 'Linux x64',
             icon: 'fab fa-linux',
-            description: 'Linux 64位版本',
-            patterns: [/amd64/i, /x86_64/i, /x64/i]
+            description: 'Linux 64位 (x86_64) 静态版本',
+            patterns: [/amd64/i, /x86_64/i, /x64/i],
+            order: 2
         },
         'linux-x86': {
             name: 'Linux x86',
             icon: 'fab fa-linux',
-            description: 'Linux 32位版本',
-            patterns: [/i686/i, /x86/i, /i386/i]
+            description: 'Linux 32位 (i686) 静态版本',
+            patterns: [/i686/i, /x86/i, /i386/i],
+            order: 3
         },
         'linux-arm64': {
             name: 'Linux ARM64',
-            icon: 'fab fa-linux',
-            description: 'Linux ARM64 版本',
-            patterns: [/arm64/i, /aarch64/i]
+            icon: 'fas fa-microchip',
+            description: 'Linux ARM64 静态版本',
+            patterns: [/arm64/i, /aarch64/i],
+            order: 4
         },
         'linux-armhf': {
             name: 'Linux ARMHF',
-            icon: 'fab fa-linux',
-            description: 'Linux ARM硬浮点版本',
-            patterns: [/armhf/i]
+            icon: 'fas fa-raspberry-pi',
+            description: 'Linux ARM硬浮点静态版本',
+            patterns: [/armhf/i],
+            order: 5
         },
         'linux-armel': {
             name: 'Linux ARMEL',
-            icon: 'fab fa-linux',
-            description: 'Linux ARM软浮点版本',
-            patterns: [/armel/i]
+            icon: 'fas fa-robot',
+            description: 'Linux ARM软浮点静态版本',
+            patterns: [/armel/i],
+            order: 6
         },
         'source': {
             name: '源代码',
             icon: 'fas fa-code',
             description: '源代码包',
-            patterns: [/source/i, /src\./i]
+            patterns: [/source/i, /src\./i],
+            order: 7
         },
         'other': {
             name: '其他',
             icon: 'fas fa-file-archive',
             description: '其他文件',
-            patterns: []
+            patterns: [],
+            order: 8
         }
     },
     
@@ -71,26 +79,30 @@ const CONFIG = {
     },
     
     // 获取文件描述
-    getFileDescription(fileName, category) {
-        const fileInfo = this.getFileCategory(fileName);
+    getFileDescription(fileName) {
+        const category = this.getFileCategory(fileName);
         
-        // 尝试从文件名中提取版本信息
-        const versionMatch = fileName.match(/(\d+\.\d+(?:\.\d+)*)/);
-        const version = versionMatch ? versionMatch[1] : '';
-        
-        // 构建描述
-        let description = fileInfo.description;
-        
-        // 添加特定文件类型的额外描述
+        // 如果文件名包含特定模式，生成更具体的描述
         if (fileName.includes('essentials_build')) {
-            description = 'Windows 64位版本，包含 ffmpeg, ffprobe, ffplay';
+            return 'Windows 64位版本，包含 ffmpeg, ffprobe, ffplay';
         } else if (fileName.includes('static')) {
-            description += ' (静态链接版本)';
+            return `${category.description} (静态链接版本)`;
         } else if (fileName.includes('shared')) {
-            description += ' (动态链接版本)';
+            return `${category.description} (动态链接版本)`;
         }
         
-        return description;
+        return category.description;
+    },
+    
+    // 获取文件类型标签
+    getFileType(fileName) {
+        if (fileName.endsWith('.zip')) return 'ZIP';
+        if (fileName.endsWith('.tar.xz')) return 'TAR.XZ';
+        if (fileName.endsWith('.tar.gz')) return 'TAR.GZ';
+        if (fileName.endsWith('.exe')) return 'EXE';
+        if (fileName.endsWith('.deb')) return 'DEB';
+        if (fileName.endsWith('.rpm')) return 'RPM';
+        return 'FILE';
     }
 };
 
@@ -139,7 +151,7 @@ class FfmpegDownloader {
     constructor() {
         this.currentRelease = null;
         this.filesData = [];
-        this.currentSort = 'name';
+        this.currentSort = 'category';
         this.searchTerm = '';
         this.init();
     }
@@ -147,8 +159,7 @@ class FfmpegDownloader {
     async init() {
         this.initClipboard();
         this.initFAQ();
-        this.initSearch();
-        this.initSorting();
+        this.initControlPanel();
         await this.fetchReleaseData();
         
         // 自动刷新
@@ -211,62 +222,35 @@ class FfmpegDownloader {
         });
     }
     
-    // 初始化搜索
-    initSearch() {
-        const searchContainer = document.createElement('div');
-        searchContainer.className = 'file-search';
-        searchContainer.innerHTML = `
+    // 初始化控制面板
+    initControlPanel() {
+        const controlPanel = document.getElementById('controlPanel');
+        if (!controlPanel) return;
+        
+        controlPanel.innerHTML = `
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
                 <input type="text" id="fileSearch" class="search-input" 
                        placeholder="搜索文件 (按文件名、平台、架构...)">
             </div>
-            <div class="search-hint">
-                <i class="fas fa-info-circle"></i>
-                输入关键词筛选文件，支持平台(Windows/Linux)、架构(x64/arm)等
-            </div>
-        `;
-        
-        const downloadSection = document.querySelector('.download-section');
-        downloadSection.insertBefore(searchContainer, downloadSection.querySelector('.files-grid'));
-        
-        const searchInput = document.getElementById('fileSearch');
-        searchInput.addEventListener('input', Utils.debounce((e) => {
-            this.searchTerm = e.target.value.toLowerCase();
-            this.filterAndSortFiles();
-        }, 300));
-        
-        // 添加搜索快捷键
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                e.preventDefault();
-                searchInput.focus();
-                searchInput.select();
-            }
-        });
-    }
-    
-    // 初始化排序
-    initSorting() {
-        const sortContainer = document.createElement('div');
-        sortContainer.className = 'file-sort';
-        sortContainer.innerHTML = `
-            <span class="sort-label">排序方式:</span>
             <div class="sort-buttons">
-                <button class="sort-btn active" data-sort="name">名称</button>
+                <button class="sort-btn active" data-sort="category">分类</button>
+                <button class="sort-btn" data-sort="name">名称</button>
                 <button class="sort-btn" data-sort="size">大小</button>
-                <button class="sort-btn" data-sort="type">类型</button>
-                <button class="sort-btn" data-sort="platform">平台</button>
             </div>
             <button class="refresh-btn" id="refreshBtn">
                 <i class="fas fa-sync-alt"></i> 刷新
             </button>
         `;
         
-        const downloadSection = document.querySelector('.download-section');
-        downloadSection.insertBefore(sortContainer, downloadSection.querySelector('.file-search'));
+        // 搜索功能
+        const searchInput = document.getElementById('fileSearch');
+        searchInput.addEventListener('input', Utils.debounce((e) => {
+            this.searchTerm = e.target.value.toLowerCase().trim();
+            this.filterAndSortFiles();
+        }, 300));
         
-        // 排序按钮事件
+        // 排序功能
         document.querySelectorAll('.sort-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const sortBy = e.target.dataset.sort;
@@ -274,7 +258,7 @@ class FfmpegDownloader {
             });
         });
         
-        // 刷新按钮事件
+        // 刷新功能
         document.getElementById('refreshBtn').addEventListener('click', () => {
             this.refreshData();
         });
@@ -301,7 +285,7 @@ class FfmpegDownloader {
             filteredFiles = filteredFiles.filter(file => {
                 const fileName = file.name.toLowerCase();
                 const fileCategory = CONFIG.getFileCategory(fileName);
-                const description = CONFIG.getFileDescription(fileName, fileCategory);
+                const description = CONFIG.getFileDescription(fileName);
                 
                 return fileName.includes(this.searchTerm) ||
                        fileCategory.name.toLowerCase().includes(this.searchTerm) ||
@@ -311,17 +295,20 @@ class FfmpegDownloader {
         
         // 排序
         filteredFiles.sort((a, b) => {
+            const categoryA = CONFIG.getFileCategory(a.name);
+            const categoryB = CONFIG.getFileCategory(b.name);
+            
             switch (this.currentSort) {
+                case 'name':
+                    return a.name.localeCompare(b.name);
                 case 'size':
                     return b.size - a.size;
-                case 'type':
-                    return CONFIG.getFileCategory(a.name).name.localeCompare(CONFIG.getFileCategory(b.name).name);
-                case 'platform':
-                    const platformA = CONFIG.getFileCategory(a.name);
-                    const platformB = CONFIG.getFileCategory(b.name);
-                    return platformA.name.localeCompare(platformB.name);
-                case 'name':
+                case 'category':
                 default:
+                    // 先按分类排序，再按名称排序
+                    if (categoryA.order !== categoryB.order) {
+                        return categoryA.order - categoryB.order;
+                    }
                     return a.name.localeCompare(b.name);
             }
         });
@@ -338,8 +325,6 @@ class FfmpegDownloader {
         
         try {
             await this.fetchReleaseData();
-            
-            // 显示成功消息
             this.showMessage('数据已刷新!', 'success');
         } catch (error) {
             console.error('刷新失败:', error);
@@ -369,7 +354,7 @@ class FfmpegDownloader {
             background: ${type === 'success' ? '#28a745' : '#dc3545'};
             color: white;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-hover);
             z-index: 1000;
             animation: slideIn 0.3s ease;
         `;
@@ -391,12 +376,10 @@ class FfmpegDownloader {
             const newRelease = await response.json();
             
             if (this.currentRelease && newRelease.id !== this.currentRelease.id) {
-                // 有更新
                 this.showMessage(`发现新版本: ${newRelease.tag_name}`, 'info');
                 this.fetchReleaseData();
             }
             
-            // 更新最后检查时间
             this.updateLastCheck();
         } catch (error) {
             console.error('检查更新失败:', error);
@@ -406,20 +389,14 @@ class FfmpegDownloader {
     // 更新最后检查时间
     updateLastCheck() {
         const updateInfoDiv = document.getElementById('updateInfo');
-        if (updateInfoDiv) {
+        if (updateInfoDiv && !updateInfoDiv.querySelector('.update-timestamp')) {
             const timestampDiv = document.createElement('div');
             timestampDiv.className = 'update-timestamp';
             timestampDiv.innerHTML = `
                 <i class="far fa-clock"></i>
                 最后检查: ${new Date().toLocaleTimeString('zh-CN')}
             `;
-            
-            const existingTimestamp = updateInfoDiv.querySelector('.update-timestamp');
-            if (existingTimestamp) {
-                existingTimestamp.replaceWith(timestampDiv);
-            } else {
-                updateInfoDiv.appendChild(timestampDiv);
-            }
+            updateInfoDiv.appendChild(timestampDiv);
         }
     }
     
@@ -473,7 +450,7 @@ class FfmpegDownloader {
         
         updateInfoDiv.innerHTML = `
             <h4><i class="fas fa-history"></i> 版本信息</h4>
-            <p><strong>最新版本:</strong> <span class="version-tag">${Utils.escapeHtml(releaseData.tag_name)}</span></p>
+            <p><strong>最新版本:</strong> <span style="color: var(--primary-color); font-weight: bold;">${Utils.escapeHtml(releaseData.tag_name)}</span></p>
             <p><strong>发布日期:</strong> ${Utils.formatDate(releaseData.published_at)}</p>
             <p><strong>文件总数:</strong> ${releaseData.assets.length} 个</p>
             ${releaseData.body ? `<p><strong>更新说明:</strong> ${Utils.escapeHtml(releaseData.body.substring(0, 150))}${releaseData.body.length > 150 ? '...' : ''}</p>` : ''}
@@ -518,34 +495,46 @@ class FfmpegDownloader {
         
         // 按类别分组
         const filesByCategory = {};
+        const usedCategories = new Set();
         
+        // 初始化分类
+        Object.keys(CONFIG.fileCategories).forEach(category => {
+            filesByCategory[category] = [];
+        });
+        
+        // 分组文件
         assets.forEach(asset => {
             const category = CONFIG.getFileCategory(asset.name);
-            if (!filesByCategory[category.id]) {
-                filesByCategory[category.id] = [];
-            }
             filesByCategory[category.id].push(asset);
+            usedCategories.add(category.id);
         });
         
         // 清空容器
         filesContainer.innerHTML = '';
         
-        // 按类别顺序显示
-        const categoryOrder = ['windows', 'linux-x64', 'linux-x86', 'linux-arm64', 'linux-armhf', 'linux-armel', 'source', 'other'];
+        // 按分类顺序显示
+        const sortedCategories = Array.from(usedCategories)
+            .sort((a, b) => CONFIG.fileCategories[a].order - CONFIG.fileCategories[b].order);
         
-        categoryOrder.forEach(categoryId => {
-            if (filesByCategory[categoryId] && filesByCategory[categoryId].length > 0) {
-                const category = CONFIG.fileCategories[categoryId];
+        sortedCategories.forEach(categoryId => {
+            const categoryFiles = filesByCategory[categoryId];
+            if (categoryFiles.length === 0) return;
+            
+            const category = CONFIG.fileCategories[categoryId];
+            
+            // 添加分类标题
+            if (categoryId !== 'other') {
                 const categoryTitle = document.createElement('div');
                 categoryTitle.className = 'files-category';
                 categoryTitle.innerHTML = `<h3><i class="${category.icon}"></i> ${category.name}</h3>`;
                 filesContainer.appendChild(categoryTitle);
-                
-                filesByCategory[categoryId].forEach(asset => {
-                    const fileCard = this.createFileCard(asset);
-                    filesContainer.appendChild(fileCard);
-                });
             }
+            
+            // 添加文件卡片
+            categoryFiles.forEach(asset => {
+                const fileCard = this.createFileCard(asset);
+                filesContainer.appendChild(fileCard);
+            });
         });
     }
     
@@ -554,7 +543,8 @@ class FfmpegDownloader {
         const fileName = asset.name;
         const fileSize = Utils.formatFileSize(asset.size);
         const fileCategory = CONFIG.getFileCategory(fileName);
-        const description = CONFIG.getFileDescription(fileName, fileCategory);
+        const description = CONFIG.getFileDescription(fileName);
+        const fileType = CONFIG.getFileType(fileName);
         
         const directUrl = asset.browser_download_url;
         const proxyDownloadUrl = CONFIG.proxyUrl + directUrl;
@@ -562,41 +552,44 @@ class FfmpegDownloader {
         const fileCard = document.createElement('div');
         fileCard.className = 'file-card';
         fileCard.dataset.name = fileName.toLowerCase();
+        fileCard.dataset.category = fileCategory.id;
+        
+        // 修复：确保ARM架构文件正确分类
+        if (fileName.includes('arm64')) {
+            fileCard.dataset.category = 'linux-arm64';
+        } else if (fileName.includes('armhf')) {
+            fileCard.dataset.category = 'linux-armhf';
+        } else if (fileName.includes('armel')) {
+            fileCard.dataset.category = 'linux-armel';
+        }
         
         fileCard.innerHTML = `
-            <div class="file-header">
-                <div class="file-name">${Utils.escapeHtml(fileName)}</div>
+            <div class="card-header">
+                <div class="platform-info">
+                    <i class="${fileCategory.icon} platform-icon"></i>
+                    <h4 class="platform-name">${fileCategory.name}</h4>
+                </div>
                 <div class="file-size">${fileSize}</div>
             </div>
-            <div class="file-platform">
-                <i class="${fileCategory.icon}"></i> ${fileCategory.name}
-                <span class="file-type ${fileCategory.id}">${this.getFileType(fileName)}</span>
+            <div class="card-body">
+                <div class="file-name">${Utils.escapeHtml(fileName)}</div>
+                <p class="file-description">${Utils.escapeHtml(description)}</p>
             </div>
-            <p class="file-description">${Utils.escapeHtml(description)}</p>
-            <div class="download-buttons">
-                <a href="${proxyDownloadUrl}" class="btn btn-primary" download 
-                   onclick="trackDownload('${fileName}', 'proxy')">
-                    <i class="fas fa-bolt"></i> 加速下载
-                </a>
-                <a href="${directUrl}" class="btn btn-secondary" download
-                   onclick="trackDownload('${fileName}', 'direct')">
-                    <i class="fas fa-download"></i> 直接下载
-                </a>
+            <div class="card-footer">
+                <div class="download-buttons">
+                    <a href="${proxyDownloadUrl}" class="btn btn-primary" download 
+                       onclick="trackDownload('${fileName}', 'proxy')">
+                        <i class="fas fa-bolt"></i> 加速下载
+                    </a>
+                    <a href="${directUrl}" class="btn btn-secondary" download
+                       onclick="trackDownload('${fileName}', 'direct')">
+                        <i class="fas fa-download"></i> 直接下载
+                    </a>
+                </div>
             </div>
         `;
         
         return fileCard;
-    }
-    
-    // 获取文件类型
-    getFileType(fileName) {
-        if (fileName.endsWith('.zip')) return 'ZIP';
-        if (fileName.endsWith('.tar.xz')) return 'TAR.XZ';
-        if (fileName.endsWith('.tar.gz')) return 'TAR.GZ';
-        if (fileName.endsWith('.exe')) return 'EXE';
-        if (fileName.endsWith('.deb')) return 'DEB';
-        if (fileName.endsWith('.rpm')) return 'RPM';
-        return 'FILE';
     }
     
     // 更新代码块中的下载链接
@@ -605,8 +598,9 @@ class FfmpegDownloader {
         if (linuxCodeBlock) {
             // 查找Linux amd64版本
             const linuxAmd64Asset = assets.find(asset => {
-                const category = CONFIG.getFileCategory(asset.name);
-                return category.id === 'linux-x64' && asset.name.includes('static');
+                return (asset.name.includes('amd64') || asset.name.includes('x86_64')) && 
+                       asset.name.includes('static') &&
+                       !asset.name.includes('i686');
             });
             
             if (linuxAmd64Asset) {
@@ -670,9 +664,6 @@ function trackDownload(fileName, type) {
 document.addEventListener('DOMContentLoaded', () => {
     new FfmpegDownloader();
     
-    // 添加页面加载动画
-    document.body.classList.add('loaded');
-    
     // 添加CSS动画
     const style = document.createElement('style');
     style.textContent = `
@@ -685,6 +676,20 @@ document.addEventListener('DOMContentLoaded', () => {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
+        
+        .loaded .container {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     `;
     document.head.appendChild(style);
+    
+    // 添加页面加载完成类
+    setTimeout(() => {
+        document.body.classList.add('loaded');
+    }, 100);
 });
