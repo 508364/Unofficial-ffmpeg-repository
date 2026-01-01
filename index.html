@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unofficial FFmpeg Repository - FFmpeg 7.1.1 下载</title>
+    <meta name="description" content="非官方 FFmpeg 7.1.1 预构建二进制文件下载，支持 Windows 和 Linux 多架构">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1><i class="fas fa-download"></i> Unofficial FFmpeg Repository</h1>
+                <p class="subtitle">非官方 FFmpeg 7.1.1 预构建二进制文件下载</p>
+                <a href="https://github.com/508364/Unofficial-ffmpeg-repository" class="github-link" target="_blank">
+                    <i class="fab fa-github"></i> GitHub 仓库主页
+                </a>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> 关于此仓库</h3>
+                <p>这是一个非官方的 FFmpeg 预构建二进制文件仓库，提供方便快捷的 FFmpeg 7.1.1 版本下载。所有文件来源于官方 FFmpeg 构建，由于 GitHub 仓库限制上传超过 25MB 的文件，所有 FFmpeg 二进制文件已发布到 Releases 页面。</p>
+            </div>
+            
+            <div class="proxy-notice">
+                <i class="fas fa-bolt"></i>
+                <strong>加速说明：</strong> 本页面已集成 gh-proxy.com 加速服务，如果您在中国大陆访问 GitHub 下载较慢，可以使用加速下载链接。
+            </div>
+            
+            <div id="versionInfo" class="version-info">
+                <!-- 版本信息将通过JavaScript动态加载 -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>正在加载版本信息...</p>
+                </div>
+            </div>
+            
+            <div class="download-section">
+                <h2 class="section-title"><i class="fas fa-cloud-download-alt"></i> 下载文件</h2>
+                <div id="filesContainer" class="files-grid">
+                    <!-- 文件列表将通过JavaScript动态加载 -->
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3><i class="fas fa-book"></i> 安装与使用说明</h3>
+                
+                <h4><i class="fab fa-windows"></i> Windows 系统</h4>
+                <ol>
+                    <li>下载 <code>ffmpeg-7.1.1-essentials_build.zip</code></li>
+                    <li>解压到任意目录（例如 <code>C:\ffmpeg</code>）</li>
+                    <li>将 <code>bin</code> 目录添加到系统 PATH 环境变量</li>
+                    <li>或在命令行中直接使用完整路径运行</li>
+                </ol>
+                
+                <h4><i class="fab fa-linux"></i> Linux 系统</h4>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>Linux 安装命令</span>
+                        <button class="copy-btn" data-clipboard-target="#linux-code">
+                            <i class="far fa-copy"></i> 复制
+                        </button>
+                    </div>
+                    <pre id="linux-code"><code># 下载并解压
+wget [下载链接]
+tar -xf ffmpeg-release-amd64-static.tar.xz
+cd ffmpeg-7.1.1-amd64-static/
+
+# 运行 FFmpeg
+./ffmpeg
+
+# 安装到系统路径
+sudo cp ffmpeg ffprobe /usr/local/bin/</code></pre>
+                </div>
+                
+                <h4><i class="fas fa-check-circle"></i> 验证安装</h4>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span>验证命令</span>
+                        <button class="copy-btn" data-clipboard-target="#verify-code">
+                            <i class="far fa-copy"></i> 复制
+                        </button>
+                    </div>
+                    <pre id="verify-code"><code># 检查版本
+ffmpeg -version
+
+# 查看支持的编解码器
+ffmpeg -codecs
+
+# 测试基本功能
+ffmpeg -i input.mp4 output.avi</code></pre>
+                </div>
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-microchip"></i> 系统架构说明</h3>
+                <div class="arch-grid">
+                    <div class="arch-item">
+                        <i class="fab fa-windows"></i>
+                        <h4>Windows</h4>
+                        <p>仅提供 64 位 (x86_64) 版本</p>
+                    </div>
+                    <div class="arch-item">
+                        <i class="fas fa-desktop"></i>
+                        <h4>Linux amd64</h4>
+                        <p>标准 64 位 PC 服务器</p>
+                    </div>
+                    <div class="arch-item">
+                        <i class="fas fa-desktop"></i>
+                        <h4>Linux i686</h4>
+                        <p>32 位 PC</p>
+                    </div>
+                    <div class="arch-item">
+                        <i class="fas fa-microchip"></i>
+                        <h4>Linux ARM64</h4>
+                        <p>64 位 ARM 设备（树莓派 3/4，ARM 服务器）</p>
+                    </div>
+                    <div class="arch-item">
+                        <i class="fas fa-raspberry-pi"></i>
+                        <h4>Linux ARMHF</h4>
+                        <p>硬浮点 ARM 设备（树莓派 2/3）</p>
+                    </div>
+                    <div class="arch-item">
+                        <i class="fas fa-robot"></i>
+                        <h4>Linux ARMEL</h4>
+                        <p>软浮点 ARM 设备（旧款 ARM 设备）</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="faq-section">
+                <h3><i class="fas fa-question-circle"></i> 常见问题</h3>
+                <div class="faq-item">
+                    <div class="faq-question">如何设置 PATH 环境变量？</div>
+                    <div class="faq-answer">
+                        <p><strong>Windows:</strong> 右键点击"此电脑" → 属性 → 高级系统设置 → 环境变量 → 在系统变量中找到Path → 编辑 → 添加FFmpeg的bin目录路径</p>
+                        <p><strong>Linux/macOS:</strong> 在 ~/.bashrc 或 ~/.zshrc 中添加: <code>export PATH=$PATH:/path/to/ffmpeg/bin</code></p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">下载速度很慢怎么办？</div>
+                    <div class="faq-answer">
+                        <p>请使用"加速下载"按钮，该链接通过 gh-proxy.com 代理，可以显著提高在中国大陆的下载速度。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-content">
+                <p><i class="far fa-copyright"></i> 2024 Unofficial FFmpeg Repository</p>
+                <p>所有二进制文件来源于 <a href="https://ffmpeg.org/" target="_blank">官方 FFmpeg 构建</a></p>
+                <div class="disclaimer">
+                    <p><i class="fas fa-exclamation-triangle"></i> 免责声明：本仓库提供的二进制文件来源于官方 FFmpeg 构建，但维护者不对其功能完整性或适用性作任何保证。使用者需自行承担风险。</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
