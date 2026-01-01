@@ -777,3 +777,264 @@ footer a:hover {
         align-self: flex-start;
     }
 }
+
+/* 更新状态区域 */
+.update-section {
+    margin-bottom: 2rem;
+}
+
+.update-info {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.update-info h4 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.update-info p {
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+}
+
+.update-timestamp {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 0.5rem;
+}
+
+/* 文件类型标签 */
+.file-type {
+    display: inline-block;
+    background-color: var(--light-bg);
+    color: var(--secondary-color);
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.file-type.windows {
+    background-color: #0078d7;
+    color: white;
+}
+
+.file-type.linux {
+    background-color: #f1502f;
+    color: white;
+}
+
+.file-type.source {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* 文件分类 */
+.files-category {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.files-category h3 {
+    color: var(--dark-bg);
+    font-size: 1.3rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* 版本标签 */
+.version-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* 文件搜索 */
+.file-search {
+    margin-bottom: 1.5rem;
+}
+
+.search-container {
+    position: relative;
+    max-width: 500px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: white;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(32, 136, 255, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary-color);
+}
+
+.search-hint {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 高亮搜索结果 */
+.file-card.highlight {
+    animation: highlight-pulse 1s ease;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 20px rgba(32, 136, 255, 0.3);
+}
+
+@keyframes highlight-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(32, 136, 255, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(32, 136, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(32, 136, 255, 0); }
+}
+
+/* 无结果提示 */
+.no-results {
+    text-align: center;
+    padding: 3rem;
+    grid-column: 1 / -1;
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: var(--border-color);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* 文件排序 */
+.file-sort {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.sort-label {
+    font-weight: 600;
+    color: var(--dark-bg);
+}
+
+.sort-btn {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.sort-btn:hover {
+    background-color: #e9ecef;
+    color: var(--dark-bg);
+}
+
+.sort-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* 刷新按钮 */
+.refresh-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(32, 136, 255, 0.3);
+}
+
+.refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.refresh-btn.spinning i {
+    animation: spin 1s linear infinite;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .file-search {
+        margin-bottom: 1rem;
+    }
+    
+    .search-input {
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+    }
+    
+    .search-icon {
+        left: 0.8rem;
+    }
+    
+    .file-sort {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .sort-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .refresh-btn {
+        margin-left: 0;
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+}
